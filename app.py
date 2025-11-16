@@ -82,7 +82,7 @@ def save_file():
                     document.folder_id = folder_id
                 document.updated_at = datetime.utcnow()
             else:
-                document = Document(
+                document = Document(  # type: ignore[call-arg]
                     filename=filename,
                     content=content,
                     folder_id=folder_id
@@ -101,7 +101,7 @@ def save_file():
                 existing.updated_at = datetime.utcnow()
                 document = existing
             else:
-                document = Document(
+                document = Document(  # type: ignore[call-arg]
                     filename=filename,
                     content=content,
                     folder_id=folder_id
@@ -148,7 +148,10 @@ def open_file():
         
         document.last_opened_at = datetime.utcnow()
         
-        recent = RecentFile(document_id=document.id, accessed_at=datetime.utcnow())
+        recent = RecentFile(  # type: ignore[call-arg]
+            document_id=document.id,
+            accessed_at=datetime.utcnow()
+        )
         db.session.add(recent)
         db.session.commit()
         
@@ -423,7 +426,7 @@ def create_folder():
     from models import Folder
     try:
         data = request.get_json()
-        folder = Folder(
+        folder = Folder(  # type: ignore[call-arg]
             name=data.get('name', 'New Folder'),
             parent_id=data.get('parent_id'),
             color=data.get('color', '#6366f1'),
@@ -495,7 +498,7 @@ def create_document():
     from models import Document
     try:
         data = request.get_json()
-        document = Document(
+        document = Document(  # type: ignore[call-arg]
             filename=data.get('filename', 'untitled.md'),
             content=data.get('content', ''),
             folder_id=data.get('folder_id')
@@ -514,7 +517,10 @@ def get_document(doc_id):
         document = Document.query.get_or_404(doc_id)
         document.last_opened_at = datetime.utcnow()
         
-        recent = RecentFile(document_id=doc_id, accessed_at=datetime.utcnow())
+        recent = RecentFile(  # type: ignore[call-arg]
+            document_id=doc_id,
+            accessed_at=datetime.utcnow()
+        )
         db.session.add(recent)
         db.session.commit()
         
@@ -577,7 +583,7 @@ def create_tag():
     from models import Tag
     try:
         data = request.get_json()
-        tag = Tag(
+        tag = Tag(  # type: ignore[call-arg]
             name=data.get('name'),
             color=data.get('color', '#6366f1')
         )
@@ -651,7 +657,7 @@ def create_category():
     from models import Category
     try:
         data = request.get_json()
-        category = Category(
+        category = Category(  # type: ignore[call-arg]
             name=data.get('name'),
             color=data.get('color', '#ec4899'),
             icon=data.get('icon', 'bookmark')
@@ -819,7 +825,7 @@ def migrate_legacy_files():
                 created_time = datetime.fromtimestamp(stat.st_ctime)
                 modified_time = datetime.fromtimestamp(stat.st_mtime)
                 
-                document = Document(
+                document = Document(  # type: ignore[call-arg]
                     filename=filename,
                     content=content,
                     folder_id=None,
@@ -935,18 +941,18 @@ def export_odt():
             
             if line.startswith('# '):
                 h = H(outlinelevel=1, text=line[2:])
-                textdoc.text.addElement(h)
+                textdoc.text.addElement(h)  # type: ignore[attr-defined]
             elif line.startswith('## '):
                 h = H(outlinelevel=2, text=line[3:])
-                textdoc.text.addElement(h)
+                textdoc.text.addElement(h)  # type: ignore[attr-defined]
             elif line.startswith('### '):
                 h = H(outlinelevel=3, text=line[4:])
-                textdoc.text.addElement(h)
+                textdoc.text.addElement(h)  # type: ignore[attr-defined]
             elif line.strip():
                 p = P(text=line)
-                textdoc.text.addElement(p)
+                textdoc.text.addElement(p)  # type: ignore[attr-defined]
             else:
-                textdoc.text.addElement(P())
+                textdoc.text.addElement(P())  # type: ignore[attr-defined]
         
         safe_filename = secure_filename(filename.replace('.md', ''))
         export_filename = f"{safe_filename}_export.odt"

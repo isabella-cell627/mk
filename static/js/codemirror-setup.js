@@ -344,6 +344,26 @@ class CodeMirrorSetup {
         }
     }
 
+    toggleDirection() {
+        if (!this.editor) return;
+        
+        const currentDir = this.editor.getOption('direction') || 'ltr';
+        const newDir = currentDir === 'ltr' ? 'rtl' : 'ltr';
+        
+        this.editor.setOption('direction', newDir);
+        
+        const icon = document.querySelector('#textDirectionBtn i');
+        if (icon) {
+            icon.className = newDir === 'rtl' ? 'fas fa-align-right' : 'fas fa-align-left';
+        }
+        
+        if (window.previewManager) {
+            window.previewManager.setDirection(newDir);
+        }
+        
+        return newDir;
+    }
+
     clear() {
         this.setContent('');
     }

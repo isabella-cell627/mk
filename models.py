@@ -23,7 +23,7 @@ class Folder(db.Model):
     icon = db.Column(db.String(50), default='folder')
     position = db.Column(db.Integer, default=0)
     
-    parent = relationship('Folder', remote_side=[id], backref='children')
+    children = relationship('Folder', backref=db.backref('parent', remote_side=[id]))
     documents = relationship('Document', back_populates='folder', cascade='all, delete-orphan')
     
     def to_dict(self):

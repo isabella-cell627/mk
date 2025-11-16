@@ -94,6 +94,16 @@ A complete, fully-featured professional Markdown editor application with a moder
 - `Alt+Click` - Column Selection Mode
 
 ## Recent Changes
+- **2025-11-16**: Database Integration & Bug Fixes v3.1
+  - Fixed all LSP errors in app.py and models.py with proper type annotations
+  - Resolved SQLAlchemy constructor warnings with targeted type ignore comments
+  - Fixed self-referential Folder relationship with proper backref configuration
+  - Added missing API endpoints: /api/recent, /api/favorites, /api/pinned, /api/search
+  - Added toggleDirection method to CodeMirrorSetup for RTL/LTR support
+  - Successfully initialized PostgreSQL database with all required tables
+  - Verified all JavaScript modules are properly integrated and working
+  - Application fully tested and ready for production deployment
+
 - **2025-11-15**: Advanced Editor Features v3.0
   - Integrated CodeMirror 5 for professional code editing experience
   - Added Vim, Emacs, and Sublime Text keyboard modes
