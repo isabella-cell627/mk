@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Professional Markdown Editor with Live Preview, Export to PDF/HTML, and Multi-tab Support">
+    <title>Markdown Editor Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css" id="highlight-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="highlight-dark" disabled>
+</head>
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="header-section header-left">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1 class="brand-title">MarkPro</h1>
+                        <p class="brand-subtitle">Editor</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-section header-center">
+                <div class="tabs-wrapper" id="tabsContainer">
+                    <button class="tab-button active" data-session-id="default">
+                        <span class="tab-icon"><i class="fas fa-file-alt"></i></span>
+                        <span class="tab-name">Untitled</span>
+                        <span class="tab-modified">
+                            <i class="fas fa-circle modified-indicator" style="display: none;"></i>
+                        </span>
+                        <span class="tab-close-btn">
+                            <i class="fas fa-times tab-close"></i>
+                        </span>
+                    </button>
+                    <button class="tab-new" id="newTabBtn" title="New Tab (Ctrl+T)">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-section header-right">
+                <div class="header-controls">
+                    <div class="auto-save-toggle">
+                        <label class="switch">
+                            <input type="checkbox" id="autoSaveToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="auto-save-label">Auto-save</span>
+                    </div>
+                    
+                    <div class="theme-toggle" id="themeToggle" title="Toggle Theme (Ctrl+Shift+D)">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    
+                    <div class="theme-toggle settings-icon" id="advancedSettingsBtn" title="Advanced Settings">
+                        <i class="fas fa-sliders-h"></i>
+                        <span class="settings-badge"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button class="toolbar-btn" id="toggleSidebarBtn" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button class="toolbar-btn" id="newBtn" title="New (Ctrl+N)">
+                    <i class="fas fa-file-medical"></i>
+                    <span class="btn-label">New</span>
+                </button>
+                <button class="toolbar-btn" id="openBtn" title="Open (Ctrl+O)">
+                    <i class="fas fa-folder-open"></i>
+                    <span class="btn-label">Open</span>
+                </button>
+                <button class="toolbar-btn" id="saveBtn" title="Save (Ctrl+S)">
+                    <i class="fas fa-save"></i>
+                    <span class="btn-label">Save</span>
+                </button>
+                <button class="toolbar-btn" id="saveAsBtn" title="Save As (Ctrl+Shift+S)">
+                    <i class="fas fa-file-export"></i>
+                    <span class="btn-label">Save As</span>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group search-group">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search documents..." class="search-input">
+                </div>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" id="undoBtn" title="Undo (Ctrl+Z)">
+                    <i class="fas fa-undo-alt"></i>
+                </button>
+                <button class="toolbar-btn" id="redoBtn" title="Redo (Ctrl+Y)">
+                    <i class="fas fa-redo-alt"></i>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="bold" title="Bold (Ctrl+B)">
+                    <i class="fas fa-bold"></i>
+                </button>
+                <button class="toolbar-btn" data-action="italic" title="Italic (Ctrl+I)">
+                    <i class="fas fa-italic"></i>
+                </button>
+                <button class="toolbar-btn" data-action="strikethrough" title="Strikethrough">
+                    <i class="fas fa-strikethrough"></i>
+                </button>
+                <button class="toolbar-btn" data-action="code-inline" title="Inline Code">
+                    <i class="fas fa-code"></i>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <select class="toolbar-select" id="headingSelect">
+                    <option value="">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="h4">Heading 4</option>
+                    <option value="h5">Heading 5</option>
+                    <option value="h6">Heading 6</option>
+                </select>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="ul" title="Unordered List">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button class="toolbar-btn" data-action="ol" title="Ordered List">
+                    <i class="fas fa-list-ol"></i>
+                </button>
+                <button class="toolbar-btn" data-action="checklist" title="Task List">
+                    <i class="fas fa-tasks"></i>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" data-action="link" title="Link (Ctrl+K)">
+                    <i class="fas fa-link"></i>
+                </button>
+                <button class="toolbar-btn" data-action="image" title="Image">
+                    <i class="fas fa-image"></i>
+                </button>
+                <button class="toolbar-btn" data-action="table" title="Table">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button class="toolbar-btn" data-action="quote" title="Quote">
+                    <i class="fas fa-quote-right"></i>
+                </button>
+                <button class="toolbar-btn" data-action="code-block" title="Code Block">
+                    <i class="fas fa-file-code"></i>
+                </button>
+                <button class="toolbar-btn" data-action="hr" title="Horizontal Rule">
+                    <i class="fas fa-grip-lines"></i>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <button class="toolbar-btn" id="textDirectionBtn" title="Toggle Text Direction (Ctrl+Shift+T)">
+                    <i class="fas fa-align-right"></i>
+                </button>
+                <button class="toolbar-btn toggle-active" id="previewToggle" title="Toggle Preview (Ctrl+P)">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            
+            <div class="toolbar-divider"></div>
+            
+            <div class="toolbar-group">
+                <div class="dropdown">
+                    <button class="toolbar-btn">
+                        <i class="fas fa-download"></i>
+                        <span class="btn-label">Export</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#" data-export="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Export as PDF</span>
+                        </a>
+                        <a href="#" data-export="html">
+                            <i class="fas fa-file-code"></i>
+                            <span>Export as HTML</span>
+                        </a>
+                        <a href="#" data-export="txt">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Export as Text</span>
+                        </a>
+                        <a href="#" data-export="docx">
+                            <i class="fas fa-file-word"></i>
+                            <span>Export as DOCX (Word)</span>
+                        </a>
+                        <a href="#" data-export="odt">
+                            <i class="fas fa-file"></i>
+                            <span>Export as ODT (OpenDocument)</span>
+                        </a>
+                        <a href="#" data-export="latex">
+                            <i class="fas fa-file-code"></i>
+                            <span>Export as LaTeX</span>
+                        </a>
+                        <a href="#" data-export="epub">
+                            <i class="fas fa-book"></i>
+                            <span>Export as EPUB (eBook)</span>
+                        </a>
+                        <a href="#" data-export="presentation">
+                            <i class="fas fa-presentation"></i>
+                            <span>Export as Presentation (reveal.js)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <aside class="file-sidebar" id="fileSidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-header">
+                        <h3><i class="fas fa-folder"></i> Folders</h3>
+                        <button class="btn-icon" onclick="fileManager.createFolder()" title="New Folder">
+                            <i class="fas fa-folder-plus"></i>
+                        </button>
+                    </div>
+                    <div class="folder-tree">
+                        <p class="loading">Loading...</p>
+                    </div>
+                </div>
+            </aside>
+            
+            <div class="document-panel" id="documentPanel" style="display: none;">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-folder-open"></i>
+                        Documents
+                    </h2>
+                    <button class="btn-primary" onclick="fileManager.createDocument()">
+                        <i class="fas fa-plus"></i>
+                        New Document
+                    </button>
+                </div>
+                <div class="panel-content">
+                    <div id="documentList" class="document-list">
+                        <p class="loading">Loading documents...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-container" id="editorContainer">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-pen-fancy"></i>
+                        Editor
+                    </h2>
+                </div>
+                <div class="panel-content">
+                    <textarea class="editor" id="editor" placeholder="Start typing your markdown here..." spellcheck="true"></textarea>
+                </div>
+            </div>
+            
+            <div class="resizer" id="resizer">
+                <div class="resizer-handle">
+                    <i class="fas fa-grip-lines-vertical"></i>
+                </div>
+            </div>
+            
+            <div class="preview-container" id="previewContainer">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-eye"></i>
+                        Preview
+                    </h2>
+                </div>
+                <div class="panel-content">
+                    <div class="preview" id="preview">
+                        <div class="preview-empty">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Preview will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="status-indicator">
+                    <i class="fas fa-circle"></i>
+                </span>
+                <span id="statusMessage" class="status-text">Ready</span>
+            </div>
+            <div class="status-right">
+                <span id="wordCount">0 words</span>
+                <span class="status-divider">|</span>
+                <span id="charCount">0 characters</span>
+                <span class="status-divider">|</span>
+                <span id="lineCount">1 line</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="openFileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-folder-open"></i>
+                    Open File
+                </h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-list" id="fileList">
+                    <div class="loading">Loading files...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="saveAsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-save"></i>
+                    Save As
+                </h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="saveAsInput" class="modal-input" placeholder="Enter filename (e.g., document.md)">
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="saveAsConfirm">
+                        <i class="fas fa-check"></i>
+                        Save
+                    </button>
+                    <button class="btn btn-secondary modal-close">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="advanced-features-panel" id="advancedFeaturesPanel">
+        <div class="panel-header-advanced">
+            <h2><i class="fas fa-cogs"></i> Advanced Settings</h2>
+            <button class="panel-close-btn" id="closeAdvancedPanel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="panel-body">
+            <div class="settings-section">
+                <h3><i class="fas fa-keyboard"></i> Editor Mode</h3>
+                <div class="setting-item">
+                    <label class="setting-label">Keymap Mode</label>
+                    <select class="setting-select" id="editorModeSelect">
+                        <option value="default">Default</option>
+                        <option value="vim">Vim</option>
+                        <option value="emacs">Emacs</option>
+                        <option value="sublime">Sublime Text</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-eye"></i> Display Options</h3>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="lineNumbersToggle" checked>
+                        <span class="setting-checkbox-label">Show Line Numbers</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="codeFoldingToggle" checked>
+                        <span class="setting-checkbox-label">Enable Code Folding</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="activeLineToggle" checked>
+                        <span class="setting-checkbox-label">Highlight Active Line</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-spell-check"></i> Spell Checking</h3>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="spellCheckEnglish" checked>
+                        <span class="setting-checkbox-label">English Spell Check</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="spellCheckArabic">
+                        <span class="setting-checkbox-label">Arabic Spell Check</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="grammarCheck">
+                        <span class="setting-checkbox-label">Grammar Suggestions</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="autoCorrect">
+                        <span class="setting-checkbox-label">Auto-correct</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-mouse-pointer"></i> Multi-cursor</h3>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="multipleCursors" checked>
+                        <span class="setting-checkbox-label">Enable Multiple Cursors</span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label class="setting-checkbox">
+                        <input type="checkbox" id="columnSelection" checked>
+                        <span class="setting-checkbox-label">Column Selection Mode</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-search"></i> Advanced Search</h3>
+                <div class="setting-item">
+                    <button class="btn-primary" id="openAdvancedSearchBtn" style="width: 100%;">
+                        <i class="fas fa-search-plus"></i>
+                        <span>Open Advanced Search</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="advanced-search-panel" id="advancedSearchPanel">
+        <div class="search-row">
+            <div class="search-input-wrapper">
+                <input type="text" class="search-input-advanced" id="findInput" placeholder="Find...">
+            </div>
+            <button class="search-btn" id="findBtn">
+                <i class="fas fa-search"></i>
+                Find
+            </button>
+        </div>
+        <div class="search-row">
+            <div class="search-input-wrapper">
+                <input type="text" class="search-input-advanced" id="replaceInput" placeholder="Replace with...">
+            </div>
+            <button class="search-btn" id="replaceBtn">
+                <i class="fas fa-exchange-alt"></i>
+                Replace
+            </button>
+            <button class="search-btn" id="replaceAllBtn">
+                <i class="fas fa-sync"></i>
+                Replace All
+            </button>
+        </div>
+        <div class="search-options">
+            <label class="search-option-checkbox">
+                <input type="checkbox" id="caseSensitiveSearch">
+                <span>Case Sensitive</span>
+            </label>
+            <label class="search-option-checkbox">
+                <input type="checkbox" id="wholeWordSearch">
+                <span>Whole Word</span>
+            </label>
+            <label class="search-option-checkbox">
+                <input type="checkbox" id="regexSearch">
+                <span>Use Regex</span>
+            </label>
+            <label class="search-option-checkbox">
+                <input type="checkbox" id="searchAllTabs">
+                <span>Search All Tabs</span>
+            </label>
+        </div>
+        <div class="search-results-info" id="searchResultsInfo" style="display: none;">
+            No results found
+        </div>
+    </div>
+
+    <div class="mode-indicator" id="modeIndicator">
+        <i class="fas fa-keyboard"></i>
+        <span id="modeText">VIM Mode</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="{{ url_for('static', filename='js/content-embedding.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toolbar-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sessions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/shortcuts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/file-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/codemirror-setup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/spellcheck.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/advanced-features.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        document.getElementById('toggleSidebarBtn').addEventListener('click', function() {
+            const sidebar = document.getElementById('fileSidebar');
+            sidebar.classList.toggle('collapsed');
+        });
+    </script>
+</body>
+</html>
