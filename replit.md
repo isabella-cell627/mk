@@ -44,7 +44,8 @@ A complete, fully-featured professional Markdown editor application with a moder
 ## Project Structure
 ```
 ├── app.py                      # Flask backend with API routes
-├── models.py                   # Database models
+├── storage.py                  # JSON file storage management
+├── models.py                   # Data models (file-based)
 ├── templates/
 │   └── index.html              # Main application template with advanced UI
 ├── static/
@@ -60,19 +61,25 @@ A complete, fully-featured professional Markdown editor application with a moder
 │       ├── shortcuts.js        # Keyboard shortcuts handler
 │       ├── file-manager.js     # File and folder management
 │       └── app.js              # Main app initialization
+├── data/                       # JSON storage for all data
+│   ├── documents.json          # Document storage
+│   ├── folders.json            # Folder structure
+│   ├── tags.json               # Tags storage
+│   ├── categories.json         # Categories storage
+│   └── recent_files.json       # Recent files tracking
 ├── uploads/                    # Stored markdown files
 └── exports/                    # Temporary export files
 ```
 
 ## Technology Stack
-- **Backend**: Python 3.11, Flask, SQLAlchemy
+- **Backend**: Python 3.11, Flask
+- **Storage**: JSON file-based storage system
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Editor**: CodeMirror 5 (with Vim, Emacs, Sublime keymaps)
 - **Markdown Rendering**: Marked.js
 - **Syntax Highlighting**: Highlight.js
 - **PDF Export**: WeasyPrint
 - **Icons**: Font Awesome 6
-- **Database**: PostgreSQL (via Neon)
 
 ## Keyboard Shortcuts
 - `Ctrl+S` - Save
@@ -94,6 +101,17 @@ A complete, fully-featured professional Markdown editor application with a moder
 - `Alt+Click` - Column Selection Mode
 
 ## Recent Changes
+- **2025-11-17**: File-Based Storage Migration v4.0
+  - Migrated from PostgreSQL database to JSON file-based storage
+  - All data now stored locally in `data/` directory for easy backup and portability
+  - Removed database dependencies (SQLAlchemy, psycopg2-binary, flask-sqlalchemy)
+  - Created comprehensive storage.py module for file management
+  - Updated models.py to use file-based storage instead of ORM
+  - All features preserved: folders, documents, tags, categories, recent files
+  - Thread-safe JSON file operations with locking mechanism
+  - Automatic ID generation for all entities
+  - Zero functionality lost - all API endpoints working correctly
+
 - **2025-11-16**: Database Integration & Bug Fixes v3.1
   - Fixed all LSP errors in app.py and models.py with proper type annotations
   - Resolved SQLAlchemy constructor warnings with targeted type ignore comments
